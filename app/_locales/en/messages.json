@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "RaboChecker",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "Simple keyword checker for RSS and websites just for fun!",
+    "description": "The description of the application"
+  }
+}
