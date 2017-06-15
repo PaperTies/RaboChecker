@@ -10,8 +10,8 @@
   "default_locale": "en",
   "background": {
     "scripts": [
-      "scripts/chromereload.js",
-      "scripts/background.js"
+      "bundle/chromereload.js",
+      "bundle/background.js"
     ]
   },
   "permissions": [
@@ -27,7 +27,7 @@
         "https://*/*"
       ],
       "js": [
-        "scripts/contentscript.js"
+        "bundle/contentscript.js"
       ],
       "run_at": "document_end",
       "all_frames": false

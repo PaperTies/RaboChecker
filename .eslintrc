@@ -1,0 +1,23 @@
+{
+   "extends": "airbnb-base",
+   "plugins": [
+       "import"
+   ],
+   "env": {
+       "browser": true
+   },
+   "globals": {
+       "chrome": true
+   },
+   "parser": "babel-eslint",
+   "parserOptions": {
+       "sourceType": "module",
+       "allowImportExportEverywhere": false
+   },
+   "rules": {
+       "no-use-before-define": 0,
+       "import/no-unresolved": 0,
+       "import/extensions": 0,
+       "import/no-extraneous-dependencies": 0
+   }
+}

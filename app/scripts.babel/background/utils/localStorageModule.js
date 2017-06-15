@@ -1,16 +1,16 @@
 import storage from 'chrome.storage.local';
 
-const LocalStorageModule = (function() {
-  function getAll (callback) {
+const LocalStorageModule = (function () {
+  function getAll(callback) {
     storage.get(null, callback);
   }
 
-  function get (key, callback) {
-    storage.get(key, function(obj) {callback(obj[key])});
+  function get(key, callback) {
+    storage.get(key, (obj) => { callback(obj[key]); });
   }
 
-  function set (key, value) {
-    return storage.set({[key]: value});
+  function set(key, value) {
+    return storage.set({ [key]: value });
   }
 
   return {
@@ -18,6 +18,6 @@ const LocalStorageModule = (function() {
     get,
     set,
   };
-})();
+}());
 
 export default LocalStorageModule;
