@@ -1,14 +1,14 @@
 
 
-import localStorage from 'background/utils/localStorageModule.js';
+import CoolLocalStorage from './modules/background/utils/localStorageModule.js';
 
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('previousVersion', details.previousVersion);
 });
 
-localStorage.set('cara', 'culo');
+CoolLocalStorage.set('cara', 'culo');
 
-console.log(localStorage.get('cara'));
+console.log(CoolLocalStorage.get('cara', (object) => { console.log(`Object:${object}`); }));
 
 chrome.browserAction.setBadgeText({ text: '\'Allo' });
 

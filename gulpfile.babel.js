@@ -4,8 +4,13 @@ import gulpLoadPlugins from 'gulp-load-plugins';
 import del from 'del';
 import runSequence from 'run-sequence';
 import { stream as wiredep } from 'wiredep';
+import { rollup } from 'rollup';
+import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import resolve from 'rollup-plugin-node-resolve';
 
 const $ = gulpLoadPlugins();
+
 
 gulp.task('extras', () => gulp.src([
   'app/*.*',
@@ -67,48 +72,158 @@ gulp.task('chromeManifest', () => gulp.src('app/manifest.json')
   .pipe($.if('*.js', $.sourcemaps.write('.')))
   .pipe(gulp.dest('dist')));
 
-gulp.task('babel', () => gulp.src('app/scripts.babel/**/*.js')
-  .pipe($.babel({
-    presets: ['es2015'],
-  }))
-  .pipe(gulp.dest('app/scripts')));
 
-gulp.task('bundle_background', () => gulp.src('app/scripts/background.js')
-  .pipe($.rollup({
-    entry: 'app/scripts/background.js',
-    format: 'umd',
-  }))
-  .pipe(gulp.dest('app/bundle')));
+gulp.task('bundle_background', () => {
+  return rollup({
+    entry: 'app/scripts.babel/background.js',
+    sourceMap : false,
+    plugins: [
+      babel({
+        presets: [
+          [
+            "es2015", {
+              "modules": false
+            }
+          ]
+        ],
+        babelrc: false,
+        exclude: 'node_modules/**'
+      }),
+      resolve(
+        { 
+          jsnext: true,
+          main: true
+        }
+      )
+    ]
+  })
+  .then(bundle => {
+    return bundle.generate({
+      format: 'iife',
+      moduleName: 'background'
+    })
+  })
+  .then(gen => {
+    return $.file('background.js', gen.code, {src: true})
+      .pipe(gulp.dest('app/bundle'))
+  });
+})
 
-gulp.task('bundle_chromereload', () => gulp.src('app/scripts/chromereload.js')
-  .pipe($.rollup({
-    entry: 'app/scripts/chromereload.js',
-    format: 'umd',
-  }))
-  .pipe(gulp.dest('app/bundle')));
+gulp.task('bundle_chromereload', () => {
+  return rollup({
+    entry: 'app/scripts.babel/chromereload.js',
+    sourceMap : false,
+    plugins: [
+      babel({
+        presets: [
+          [
+            "es2015", {
+              "modules": false
+            }
+          ]
+        ],
+        babelrc: false,
+        exclude: 'node_modules/**'
+      }),
+      resolve(
+        { 
+          jsnext: true,
+          main: true
+        }
+      )
+    ]
+  })
+  .then(bundle => {
+    return bundle.generate({
+      format: 'iife',
+      moduleName: 'chromereload'
+    })
+  })
+  .then(gen => {
+    return $.file('chromereload.js', gen.code, {src: true})
+      .pipe(gulp.dest('app/bundle'))
+  });
+})
 
-gulp.task('bundle_contentscript', () => gulp.src('app/scripts/contentscript.js')
-  .pipe($.rollup({
-    entry: 'app/scripts/contentscript.js',
-    format: 'umd',
-  }))
-  .pipe(gulp.dest('app/bundle')));
+gulp.task('bundle_contentscript', () => {
+  return rollup({
+    entry: 'app/scripts.babel/contentscript.js',
+    sourceMap : false,
+    plugins: [
+      babel({
+        presets: [
+          [
+            "es2015", {
+              "modules": false
+            }
+          ]
+        ],
+        babelrc: false,
+        exclude: 'node_modules/**'
+      }),
+      resolve(
+        { 
+          jsnext: true,
+          main: true
+        }
+      )
+    ]
+  })
+  .then(bundle => {
+    return bundle.generate({
+      format: 'iife',
+      moduleName: 'contentscript'
+    })
+  })
+  .then(gen => {
+    return $.file('contentscript.js', gen.code, {src: true})
+      .pipe(gulp.dest('app/bundle'))
+  });
+})
 
-gulp.task('bundle_popup', () => gulp.src('app/scripts/popup.js')
-  .pipe($.rollup({
-    entry: 'app/scripts/popup.js',
-    format: 'umd',
-  }))
-  .pipe(gulp.dest('app/bundle')));
+gulp.task('bundle_popup', () => {
+  return rollup({
+    entry: 'app/scripts.babel/popup.js',
+    sourceMap : false,
+    plugins: [
+      babel({
+        presets: [
+          [
+            "es2015", {
+              "modules": false
+            }
+          ]
+        ],
+        babelrc: false,
+        exclude: 'node_modules/**'
+      }),
+      resolve(
+        { 
+          jsnext: true,
+          main: true
+        }
+      )
+    ]
+  })
+  .then(bundle => {
+    return bundle.generate({
+      format: 'iife',
+      moduleName: 'popup'
+    })
+  })
+  .then(gen => {
+    return $.file('popup.js', gen.code, {src: true})
+      .pipe(gulp.dest('app/bundle'))
+  });
+})
 
-gulp.task('bundle', ['bundle_background', 'bundle_chromereload', 'bundle_contentscript', 'bundle_popup'], () => {
-});
+gulp.task('bundle', ['bundle_background', 'bundle_chromereload', 'bundle_contentscript', 'bundle_popup'], () => {});
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('clean_scripts', del.bind(null, ['app/scripts']));
 
-gulp.task('watch', ['lint', 'babel'], () => {
+gulp.task('watch', ['lint', 'bundle'], () => {
   $.livereload.listen();
 
   gulp.watch([
@@ -119,7 +234,7 @@ gulp.task('watch', ['lint', 'babel'], () => {
     'app/_locales/**/*.json',
   ]).on('change', $.livereload.reload);
 
-  gulp.watch('app/scripts.babel/**/*.js', ['lint', 'babel', 'bundle']);
+  gulp.watch('app/scripts.babel/**/*.js', ['lint', 'bundle']);
   gulp.watch('bower.json', ['wiredep']);
 });
 
@@ -142,7 +257,7 @@ gulp.task('package', () => {
 
 gulp.task('build', (cb) => {
   runSequence(
-    'lint', 'babel', 'bundle', 'clean_scripts', 'chromeManifest',
+    'lint', 'bundle','chromeManifest',
     ['html', 'images', 'extras'],
     'size', cb);
 });

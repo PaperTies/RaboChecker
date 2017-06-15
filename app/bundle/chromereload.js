@@ -1,8 +1,5 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(factory());
-}(this, (function () { 'use strict';
+(function () {
+'use strict';
 
 // Reload client for Chrome Apps & Extensions.
 // The reload client has a compatibility with livereload.
@@ -25,4 +22,4 @@ connection.onmessage = function (e) {
   }
 };
 
-})));
+}());

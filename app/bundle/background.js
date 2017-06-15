@@ -1,25 +1,42 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(factory());
-}(this, (function () { 'use strict';
+(function () {
+'use strict';
 
-var _localStorageModule = require('background/utils/localStorageModule.js');
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var _localStorageModule2 = _interopRequireDefault(_localStorageModule);
+var CoolLocalStorage = function () {
+  function getAll(callback) {
+    chrome.storage.local.get(null, callback);
+  }
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  function get(key, callback) {
+    chrome.storage.local.get(key, function (obj) {
+      callback(obj[key]);
+    });
+  }
+
+  function set(key, value) {
+    return chrome.storage.local.set(_defineProperty({}, key, value));
+  }
+
+  return {
+    getAll: getAll,
+    get: get,
+    set: set
+  };
+}();
 
 chrome.runtime.onInstalled.addListener(function (details) {
   console.log('previousVersion', details.previousVersion);
 });
 
-_localStorageModule2.default.set('cara', 'culo');
+CoolLocalStorage.set('cara', 'culo');
 
-console.log(_localStorageModule2.default.get('cara'));
+console.log(CoolLocalStorage.get('cara', function (object) {
+  console.log('Object:' + object);
+}));
 
 chrome.browserAction.setBadgeText({ text: '\'Allo' });
 
 console.log('\'Allo \'Allo! Event Page for Browser Action');
 
-})));
+}());
