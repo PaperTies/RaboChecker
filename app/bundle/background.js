@@ -463,24 +463,15 @@
   self.fetch.polyfill = true;
 })(typeof self !== 'undefined' ? self : undefined);
 
-var requestHTMLContent = function request(url, cb) {
+var requestHTMLContent = function request(url) {
   return fetch(url).then(function (response) {
     return response.text();
   });
-  /*const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      cb(xhr.responseText);
-    }
-     return false;
-  };
-  xhr.open('GET', url, true);
-  xhr.send(null);*/
 };
 
 var keywordFinder = function keywordFinder(content, keyword) {
   var re = new RegExp(keyword, 'ig');
-  return content.match(re);
+  return content.match(re).length > 0;
 };
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -507,6 +498,27 @@ var CoolLocalStorage = function () {
   };
 }();
 
+var AudioModule = function () {
+  var AudioModule = {};
+
+  var audioFilePath = '../images/mammamia.mp3';
+  var audio = new Audio(audioFilePath);
+
+  AudioModule.changeAudio = function (audioFilePath) {
+    audio = new Audio(audioFilePath);
+  };
+
+  AudioModule.playSound = function () {
+    audio.play();
+  };
+
+  AudioModule.muted = function (mute) {
+    audio.muted = mute;
+  };
+
+  return AudioModule;
+}();
+
 chrome.runtime.onInstalled.addListener(function (details) {
   console.log('previousVersion', details.previousVersion);
 });
@@ -514,7 +526,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
 CoolLocalStorage.set('cara', 'culo');
 
 requestHTMLContent('https://bandit.io').then(function (data) {
-  console.log(keywordFinder(data, 'bandit'));
+  if (keywordFinder(data, 'bandit')) {
+    AudioModule.playSound();
+  }
 });
 
 console.log(CoolLocalStorage.get('cara', function (object) {

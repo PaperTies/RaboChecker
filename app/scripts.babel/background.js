@@ -1,6 +1,7 @@
 import requestHTMLContent from './modules/background/utils/requestModule';
 import keywordFinder from './modules/background/utils/keywordFinder';
 import CoolLocalStorage from './modules/background/utils/localStorageModule.js';
+import Audio from './modules/background/utils/audioModule';
 
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('previousVersion', details.previousVersion);
@@ -9,7 +10,9 @@ chrome.runtime.onInstalled.addListener((details) => {
 CoolLocalStorage.set('cara', 'culo');
 
 requestHTMLContent('https://bandit.io').then((data) => {
-  console.log(keywordFinder(data,'bandit'));
+  if (keywordFinder(data, 'bandit')) {
+    Audio.playSound();
+  }
 });
 
 
