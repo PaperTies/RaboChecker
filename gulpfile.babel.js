@@ -11,7 +11,6 @@ import resolve from 'rollup-plugin-node-resolve';
 
 const $ = gulpLoadPlugins();
 
-
 gulp.task('extras', () => gulp.src([
   'app/*.*',
   'app/_locales/**',
@@ -25,9 +24,7 @@ gulp.task('extras', () => gulp.src([
 }).pipe(gulp.dest('dist')));
 
 function lint(files, options) {
-  return () => gulp.src(files)
-    .pipe($.eslint(options))
-    .pipe($.eslint.format());
+  return () => gulp.src(files).pipe($.eslint(options)).pipe($.eslint.format());
 }
 
 gulp.task('lint', lint('app/scripts.babel/**/*.js', {
@@ -36,188 +33,181 @@ gulp.task('lint', lint('app/scripts.babel/**/*.js', {
   },
 }));
 
-gulp.task('images', () => gulp.src('app/images/**/*')
-  .pipe($.if($.if.isFile, $.cache($.imagemin({
+gulp.task('images',
+  () => gulp.src('app/images/**/*').pipe($.if($.if.isFile, $.cache($.imagemin({
     progressive: true,
     interlaced: true,
-    // don't remove IDs from SVGs, they are often used
-    // as hooks for embedding and styling
     svgoPlugins: [{ cleanupIDs: false }],
-  }))
-    .on('error', function (err) {
-      console.log(err);
-      this.end();
-    })))
-  .pipe(gulp.dest('dist/images')));
+  })).on('error', function (err) {
+    console.log(err);
+    this.end();
+  }))).pipe(gulp.dest('dist/images')));
 
-gulp.task('html', () => gulp.src('app/*.html')
-  .pipe($.useref({ searchPath: ['.tmp', 'app', '.'] }))
-  .pipe($.sourcemaps.init())
-  .pipe($.if('*.js', $.uglify()))
-  .pipe($.if('*.css', $.cleanCss({ compatibility: '*' })))
-  .pipe($.sourcemaps.write())
-  .pipe($.if('*.html', $.htmlmin({ removeComments: true, collapseWhitespace: true })))
-  .pipe(gulp.dest('dist')));
+gulp.task('html', () => gulp.src('app/*.html').
+  pipe($.useref({ searchPath: ['.tmp', 'app', '.'] })).
+  pipe($.sourcemaps.init()).
+  pipe($.if('*.js', $.uglify())).
+  pipe($.if('*.css', $.cleanCss({ compatibility: '*' }))).
+  pipe($.sourcemaps.write()).
+  pipe($.if('*.html',
+    $.htmlmin({ removeComments: true, collapseWhitespace: true }))).
+  pipe(gulp.dest('dist')));
 
-gulp.task('chromeManifest', () => gulp.src('app/manifest.json')
-  .pipe($.chromeManifest({
-    buildnumber: true,
-    background: {
-      target: 'bundle/background.js',
-    },
-  }))
-  .pipe($.if('*.css', $.cleanCss({ compatibility: '*' })))
-  .pipe($.if('*.js', $.sourcemaps.init()))
-  .pipe($.if('*.js', $.uglify()))
-  .pipe($.if('*.js', $.sourcemaps.write('.')))
-  .pipe(gulp.dest('dist')));
-
+gulp.task('chromeManifest',
+  () => gulp.src('app/manifest.json').
+    pipe($.chromeManifest({
+      buildnumber: true,
+      background: {
+        target: 'bundle/background.js',
+      },
+    })).
+    pipe($.if('*.css', $.cleanCss({ compatibility: '*' }))).
+    pipe($.if('*.js', $.sourcemaps.init())).
+    pipe($.if('*.js', $.uglify())).
+    pipe($.if('*.js', $.sourcemaps.write('.'))).
+    pipe(gulp.dest('dist')));
 
 gulp.task('bundle_background', () => {
   return rollup({
     entry: 'app/scripts.babel/background.js',
-    sourceMap : false,
+    sourceMap: false,
     plugins: [
       babel({
         presets: [
           [
-            "es2015", {
-              "modules": false
-            }
-          ]
+            'es2015', {
+            'modules': false,
+          },
+          ],
         ],
         babelrc: false,
-        exclude: 'node_modules/**'
+        exclude: 'node_modules/**',
       }),
       resolve(
-        { 
+        {
           jsnext: true,
-          main: true
-        }
-      )
-    ]
-  })
-  .then(bundle => {
+          main: true,
+        },
+      ),
+    ],
+  }).then(bundle => {
     return bundle.generate({
       format: 'iife',
-      moduleName: 'background'
-    })
-  })
-  .then(gen => {
-    return $.file('background.js', gen.code, {src: true})
-      .pipe(gulp.dest('app/bundle'))
+      moduleName: 'background',
+    });
+  }).then(gen => {
+    return $.file('background.js', gen.code, { src: true }).
+      pipe(gulp.dest('app/bundle'));
   });
-})
+});
 
 gulp.task('bundle_chromereload', () => {
   return rollup({
     entry: 'app/scripts.babel/chromereload.js',
-    sourceMap : false,
+    sourceMap: false,
     plugins: [
       babel({
         presets: [
           [
-            "es2015", {
-              "modules": false
-            }
-          ]
+            'es2015', {
+            'modules': false,
+          },
+          ],
         ],
         babelrc: false,
-        exclude: 'node_modules/**'
+        exclude: 'node_modules/**',
       }),
       resolve(
-        { 
+        {
           jsnext: true,
-          main: true
-        }
-      )
-    ]
-  })
-  .then(bundle => {
+          main: true,
+        },
+      ),
+    ],
+  }).then(bundle => {
     return bundle.generate({
       format: 'iife',
-      moduleName: 'chromereload'
-    })
-  })
-  .then(gen => {
-    return $.file('chromereload.js', gen.code, {src: true})
-      .pipe(gulp.dest('app/bundle'))
+      moduleName: 'chromereload',
+    });
+  }).then(gen => {
+    return $.file('chromereload.js', gen.code, { src: true }).
+      pipe(gulp.dest('app/bundle'));
   });
-})
+});
 
 gulp.task('bundle_contentscript', () => {
   return rollup({
     entry: 'app/scripts.babel/contentscript.js',
-    sourceMap : false,
+    sourceMap: false,
     plugins: [
       babel({
         presets: [
           [
-            "es2015", {
-              "modules": false
-            }
-          ]
+            'es2015', {
+            'modules': false,
+          },
+          ],
         ],
         babelrc: false,
-        exclude: 'node_modules/**'
+        exclude: 'node_modules/**',
       }),
       resolve(
-        { 
+        {
           jsnext: true,
-          main: true
-        }
-      )
-    ]
-  })
-  .then(bundle => {
+          main: true,
+        },
+      ),
+    ],
+  }).then(bundle => {
     return bundle.generate({
       format: 'iife',
-      moduleName: 'contentscript'
-    })
-  })
-  .then(gen => {
-    return $.file('contentscript.js', gen.code, {src: true})
-      .pipe(gulp.dest('app/bundle'))
+      moduleName: 'contentscript',
+    });
+  }).then(gen => {
+    return $.file('contentscript.js', gen.code, { src: true }).
+      pipe(gulp.dest('app/bundle'));
   });
-})
+});
 
 gulp.task('bundle_popup', () => {
   return rollup({
     entry: 'app/scripts.babel/popup.js',
-    sourceMap : false,
+    sourceMap: false,
     plugins: [
       babel({
         presets: [
           [
-            "es2015", {
-              "modules": false
-            }
-          ]
+            'es2015', {
+            'modules': false,
+          },
+          ],
         ],
         babelrc: false,
-        exclude: 'node_modules/**'
+        exclude: 'node_modules/**',
       }),
       resolve(
-        { 
+        {
           jsnext: true,
-          main: true
-        }
-      )
-    ]
-  })
-  .then(bundle => {
+          main: true,
+        },
+      ),
+    ],
+  }).then(bundle => {
     return bundle.generate({
       format: 'iife',
-      moduleName: 'popup'
-    })
-  })
-  .then(gen => {
-    return $.file('popup.js', gen.code, {src: true})
-      .pipe(gulp.dest('app/bundle'))
+      moduleName: 'popup',
+    });
+  }).then(gen => {
+    return $.file('popup.js', gen.code, { src: true }).
+      pipe(gulp.dest('app/bundle'));
   });
-})
+});
 
-gulp.task('bundle', ['bundle_background', 'bundle_chromereload', 'bundle_contentscript', 'bundle_popup'], () => {});
+gulp.task('bundle', [
+  'bundle_background',
+  'bundle_chromereload',
+  'bundle_contentscript',
+  'bundle_popup'], () => {});
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
@@ -238,26 +228,25 @@ gulp.task('watch', ['lint', 'bundle'], () => {
   gulp.watch('bower.json', ['wiredep']);
 });
 
-gulp.task('size', () => gulp.src('dist/**/*').pipe($.size({ title: 'build', gzip: true })));
+gulp.task('size',
+  () => gulp.src('dist/**/*').pipe($.size({ title: 'build', gzip: true })));
 
 gulp.task('wiredep', () => {
-  gulp.src('app/*.html')
-    .pipe(wiredep({
-      ignorePath: /^(\.\.\/)*\.\./,
-    }))
-    .pipe(gulp.dest('app'));
+  gulp.src('app/*.html').pipe(wiredep({
+    ignorePath: /^(\.\.\/)*\.\./,
+  })).pipe(gulp.dest('app'));
 });
 
 gulp.task('package', () => {
   const manifest = require('./dist/manifest.json');
-  return gulp.src('dist/**')
-    .pipe($.zip(`RaboChecker-${manifest.version}.zip`))
-    .pipe(gulp.dest('package'));
+  return gulp.src('dist/**').
+    pipe($.zip(`RaboChecker-${manifest.version}.zip`)).
+    pipe(gulp.dest('package'));
 });
 
 gulp.task('build', (cb) => {
   runSequence(
-    'lint', 'bundle','chromeManifest',
+    'lint', 'bundle', 'chromeManifest',
     ['html', 'images', 'extras'],
     'size', cb);
 });
